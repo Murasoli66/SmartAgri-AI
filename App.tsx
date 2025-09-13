@@ -13,8 +13,6 @@ import LoginRegisterModal from './components/LoginRegisterModal';
 
 const App: React.FC = () => {
 
-  // Service Worker registration logic has been moved to index.tsx for more reliable execution.
-
   return (
     <LanguageProvider>
       <AuthProvider>

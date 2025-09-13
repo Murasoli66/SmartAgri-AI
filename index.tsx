@@ -14,12 +14,10 @@ root.render(
   </React.StrictMode>
 );
 
-// --- Service Worker Registration ---
-// We wait for the 'load' event to ensure the page is fully loaded before registering.
-// This is the most reliable way to avoid "document is in an invalid state" errors.
+// Register the Service Worker after the page has fully loaded.
+// This is the most reliable way to avoid the "document is in an invalid state" error.
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // Construct the full URL to the service worker to avoid cross-origin errors.
     const swUrl = `${location.origin}/sw.js`;
     navigator.serviceWorker.register(swUrl)
       .then(registration => {
