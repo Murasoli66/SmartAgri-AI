@@ -14,17 +14,15 @@ root.render(
   </React.StrictMode>
 );
 
-// Register the Service Worker after the page has fully loaded.
-// This is the most reliable way to avoid the "document is in an invalid state" error.
+// Register the service worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    const swUrl = `${location.origin}/sw.js`;
-    navigator.serviceWorker.register(swUrl)
+    navigator.serviceWorker.register('/sw.js')
       .then(registration => {
-        console.log('Service Worker registered successfully with scope:', registration.scope);
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
       })
       .catch(error => {
-        console.error('Service Worker registration failed:', error);
+        console.log('ServiceWorker registration failed: ', error);
       });
   });
 }

@@ -31,8 +31,8 @@ const prompts = {
         ta: 'நீங்கள் அக்ரிபாட், விவசாயிகளுக்கான ஒரு AI உதவியாளர். பயிர் மேலாண்மை, மண் ஆரோக்கியம், பூச்சி கட்டுப்பாடு மற்றும் சந்தை போக்குகள் உள்ளிட்ட விவசாயம் குறித்த நிபுணர் ஆலோசனைகளை வழங்குவதே உங்கள் குறிக்கோள். உங்கள் பதில்களை தெளிவாகவும், சுருக்கமாகவும், ஒரு விவசாயி எளிதில் புரிந்துகொண்டு செயல்படக்கூடியதாகவும் வைத்திருங்கள். பயனரின் கேள்விக்கு அவர்களின் மொழியிலேயே பதிலளிக்கவும்.',
     },
     weatherForecast: {
-        en: (location: string) => `Provide a 5-day weather forecast for ${location}. Include the day of the week, a short, one or two-word weather condition description (e.g., 'Sunny', 'Partly Cloudy', 'Rain', 'Thunderstorm', 'Snow'), high and low temperatures in Celsius, wind speed in km/h, and humidity percentage. Respond ONLY with a JSON object in the following structure: \`\`\`json\n{"forecast": [{"day": "string", "condition": "string", "high_c": number, "low_c": number, "wind_kph": number, "humidity_percent": number}]}\n\`\`\` Do not include any text before or after the JSON object. Ensure the 'day' is the name of the day (e.g., "Monday").`,
-        ta: (location: string) => `Provide a 5-day weather forecast for ${location}. Include the day of the week, a short, one or two-word weather condition description (e.g., 'Sunny', 'Partly Cloudy', 'Rain', 'Thunderstorm', 'Snow'), high and low temperatures in Celsius, wind speed in km/h, and humidity percentage. Respond ONLY with a JSON object in the following structure: \`\`\`json\n{"forecast": [{"day": "string", "condition": "string", "high_c": number, "low_c": number, "wind_kph": number, "humidity_percent": number}]}\n\`\`\` Do not include any text before or after the JSON object. Ensure the 'day' is the name of the day (e.g., "Monday").`,
+        en: (location: string) => `Provide a 5-day weather forecast for ${location}. Include the day of the week, a short, one or two-word weather condition description (e.g., 'Sunny', 'Partly Cloudy', 'Rain', 'Thunderstorm', 'Snow'), high and low temperatures in Celsius, wind speed in km/h, and humidity percentage. Respond ONLY with a JSON object. Ensure the 'day' is the name of the day (e.g., "Monday").`,
+        ta: (location: string) => `Provide a 5-day weather forecast for ${location}. Include the day of the week, a short, one or two-word weather condition description (e.g., 'Sunny', 'Partly Cloudy', 'Rain', 'Thunderstorm', 'Snow'), high and low temperatures in Celsius, wind speed in km/h, and humidity percentage. Respond ONLY with a JSON object. Ensure the 'day' is the name of the day (e.g., "Monday").`,
     }
 }
 
@@ -75,6 +75,28 @@ const fertilizerRecommendationSchema = {
         }
     },
     required: ['recommendations']
+};
+
+const weatherForecastSchema = {
+    type: Type.OBJECT,
+    properties: {
+        forecast: {
+            type: Type.ARRAY,
+            items: {
+                type: Type.OBJECT,
+                properties: {
+                    day: { type: Type.STRING },
+                    condition: { type: Type.STRING },
+                    high_c: { type: Type.NUMBER },
+                    low_c: { type: Type.NUMBER },
+                    wind_kph: { type: Type.NUMBER },
+                    humidity_percent: { type: Type.NUMBER },
+                },
+                required: ['day', 'condition', 'high_c', 'low_c', 'wind_kph', 'humidity_percent']
+            }
+        }
+    },
+    required: ['forecast']
 };
 
 
@@ -156,11 +178,12 @@ export const getWeatherForecast = async (location: string, language: 'en' | 'ta'
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: prompts.weatherForecast[language](location),
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: weatherForecastSchema,
+            },
         });
-        const text = response.text.trim();
-        const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
-        const jsonString = jsonMatch ? jsonMatch[1] : text;
-        return JSON.parse(jsonString);
+        return JSON.parse(response.text);
     } catch (error) {
         console.error("Error getting weather forecast:", error);
         throw new Error("Could not retrieve or parse weather forecast data.");

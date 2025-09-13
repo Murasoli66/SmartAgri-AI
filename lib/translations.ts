@@ -269,7 +269,8 @@ export const translations = {
         July: "July",
         August: "August",
         September: "September",
-        October: "November",
+        October: "October",
+        November: "November",
         December: "December",
     }
   },

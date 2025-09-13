@@ -1,35 +1,21 @@
+// sw.js - A minimal service worker for installation.
 
-self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : { 
-    title: 'IADSS Agri AI', 
-    body: 'You have a new notification.' 
-  };
-  
-  const options = {
-    body: data.body,
-    icon: '/vite.svg',
-    badge: '/vite.svg',
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(data.title, options)
-  );
+// This event fires when the service worker is first installed.
+self.addEventListener('install', (event) => {
+  console.log('Service Worker: Installing...');
+  // You can pre-cache assets here if needed.
+  // For now, we'll just log the event.
 });
 
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      if (clientList.length > 0) {
-        let client = clientList[0];
-        for (let i = 0; i < clientList.length; i++) {
-          if (clientList[i].focused) {
-            client = clientList[i];
-          }
-        }
-        return client.focus();
-      }
-      return clients.openWindow('/');
-    })
-  );
+// This event fires when the service worker is activated.
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker: Activating...');
+  // This is a good place to clean up old caches.
+});
+
+// This event fires for every network request.
+self.addEventListener('fetch', (event) => {
+  // This service worker doesn't intercept fetch requests.
+  // It allows them to pass through to the network as usual.
+  // console.log('Service Worker: Fetching ', event.request.url);
 });
